@@ -22,16 +22,20 @@ Phase 1: Plan  ->  Phase 2: Investigate  ->  Phase 3: Verify  ->  Phase 4: Repor
 ## Phase 1: Research Plan
 
 1. Parse the user's topic from `$ARGUMENTS`
-2. Ask 2-3 clarifying questions to narrow scope:
+2. **Check for prior research**: Look for existing `research-evidence-*.md` and `research-report-*.md` files in the working directory. If related prior research exists, read and summarize it, then plan a **delta investigation** that builds on existing findings rather than repeating them.
+3. Ask 2-3 clarifying questions to narrow scope:
    - What specific aspects matter most?
    - Desired depth (broad overview vs. deep dive)?
    - Any known constraints (time period, region, domain)?
-3. Based on answers, produce a **Research Plan** containing:
+   - **Target reader**: Who is the intended audience? (e.g., domain expert, engineer, general reader) This determines the level of technical explanation required.
+4. Based on answers, produce a **Research Plan** containing:
    - **Objective**: One-sentence goal
    - **Sub-topics**: 3-7 specific areas to investigate (numbered)
+   - **Dependencies**: Note which sub-topics depend on others' results. Mark independent sub-topics as parallelizable.
    - **Source strategy**: What kinds of sources to prioritize (official docs, academic papers, news, etc.)
    - **Estimated searches**: Approximate number of searches needed
-4. Present the plan and wait for user approval or edits
+   - **Prior research**: If building on existing findings, list what is already covered and what is new.
+5. Present the plan and wait for user approval or edits
 
 Example output:
 ```
@@ -53,6 +57,14 @@ Proceed? (y / edit sub-topics / add more)
 
 For each sub-topic in the approved plan:
 
+### Parallelization Strategy
+When 4 or more sub-topics exist and the dependency analysis (from Phase 1) shows independent groups, delegate independent sub-topics to **parallel agents** using the Task tool. Each agent should:
+- Receive the full sub-topic description and source strategy
+- Write its findings to a dedicated file (e.g., `research-<topic>-<subtopic>.md`)
+- Return a summary upon completion
+
+After all agents complete, consolidate their findings into the unified evidence file.
+
 ### Step 2a: Search
 - Use WebSearch with focused, specific queries (1-6 words each)
 - Run 2-4 searches per sub-topic, varying the query angle
@@ -62,6 +74,11 @@ For each sub-topic in the approved plan:
 - For each promising search result, use WebFetch to read the full page
 - Extract key facts, data points, quotes, and claims
 - Record the source URL and date for every piece of information
+- **When WebFetch fails** (403, PDF parse error, etc.), follow this fallback chain:
+  1. Search for an arXiv preprint or author's personal site PDF of the same work
+  2. Search Google Scholar for cached or alternative versions
+  3. Extract information from abstracts, search snippets, and citing papers
+  4. If all fail, record the gap explicitly in the evidence card
 
 ### Step 2c: Evidence Card
 After investigating each sub-topic, write an **Evidence Card**:
@@ -75,6 +92,12 @@ After investigating each sub-topic, write an **Evidence Card**:
 - Finding 3 (Source: URL)
 **Confidence**: High / Medium / Low
 **Gaps**: Any remaining unknowns
+
+**Search log**:
+| # | Query | Useful results | Notes |
+|---|-------|---------------|-------|
+| 1 | "exact query used" | 3 | Key source found |
+| 2 | "another query" | 0 | Fallback: read source code directly |
 ```
 
 ### Step 2d: Progress Updates
